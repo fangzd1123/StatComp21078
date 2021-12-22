@@ -1,0 +1,987 @@
+---
+title: "homework"
+author: '21078'
+date: "2021/12/21"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{homework to StatComp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+
+
+## Question
+Use knitr to produce at least 3 examples (texts, figures,
+tables).
+
+## Answer
+text:
+```{r  include=TRUE, echo=TRUE, highlight=TRUE}
+"R是用于统计分析、绘图的语言和操作环境。R是属于GNU系统的一个自由、免费、源代码开放的软件，它是一个用于统计计算和统计制图的优秀工具。"
+```
+figure:
+```{r bunch_o_figs_svg, fig.height=4, fig.width=8, dev='svg'}
+n <- 50
+x <- rnorm(n)
+par(mfrow=c(1,2), las=1)
+for(i in 1:4) {
+  y <- i*2*x + rnorm(n)
+  plot(x, y, main=i)
+}
+ ```
+
+table:
+```{r  include=TRUE, echo=TRUE}
+ knitr::kable(head(mtcars[, 1:5]))
+```
+
+
+
+
+## Question
+
+Exercises 3.4, 3.11, 3.20 (page 94 and 96,
+Statistical Computing with R).
+
+## Answer
+
+3.4:\
+1)$\sigma = 1$时：
+
+```{r include=TRUE, echo=TRUE}
+n <- 1000;
+u <- runif(n,-1,0)
+x <- sqrt(-2*log(-u));
+hist(x, prob=TRUE)
+```
+\
+2)$\sigma = 2$时：
+
+```{r include=TRUE, echo=TRUE}
+n <- 1000;
+u <- runif(n,-1,0)
+x <- sqrt(-8*log(-u));
+hist(x, prob=TRUE) 
+```
+\
+3)$\sigma = 5$时：\
+```{r include=TRUE, echo=TRUE}
+n <- 1000;
+u <- runif(n,-1,0)
+x <- sqrt(-50*log(-u));
+hist(x, prob=TRUE) 
+```
+
+3.11:
+
+```{r include=TRUE, echo=TRUE}
+n <- 1000
+k <- sample(1:5, size=n, replace=TRUE, prob=(1:5)/15)
+rate <- 1/k
+x <- rnorm(n, mean=0, sd=1)
+#plot the density of the mixture
+#with the densities of the components
+plot(density(x), xlim=c(-10,10), ylim=c(0,.5),
+lwd=3, xlab="x", main="")
+for (i in 1:5)
+lines(density(rnorm(n, 3, 1/i)))
+```
+
+3.20:
+
+```{r include=TRUE, echo=TRUE}
+lambda <- 2
+t0 <- 10
+upper <- 100
+pp <- replicate(10000, expr = {
+N <- rpois(1, lambda * upper)
+Un <- rgamma(N, shape= 1,scale = 1) 
+n <- n - 1 })
+c(mean(pp), var(pp))
+```
+
+
+
+
+## Question
+
+Exercises 5.4, 5.9, 5.13, and 5.14 (pages 149-151, Statistical
+Computing with R).
+
+## Answer
+5.4
+```{r include=TRUE, echo=TRUE}
+x <- seq(0, 1.0, length = 11)
+m <- 10000
+u <- runif(m)
+cdf <- numeric(length(x))
+for (i in 1:length(x)) 
+{
+g <- 30 * x[i] * (x[i] * u)^2 * (1 - x[i] * u)^2
+cdf[i] <- mean(g) 
+Phi <- pbeta(x,3,3)
+}
+print(round(rbind(x, cdf, Phi), 3))
+```
+
+
+5.9
+```{r include=TRUE, echo=TRUE}
+rf <- function(sigma)
+{
+  n <- 10000;
+  
+  s_1 <- runif(n/2)
+  s_2 <- runif(n/2)
+  
+  X <- sqrt(-2*(sigma^2)*log(1-s_1))
+  X_1 <- sqrt(-2*(sigma^2)*log(s_1))
+
+  X1 <- sqrt(-2*(sigma^2)*log(1-s_1))
+  X2 <- sqrt(-2*(sigma^2)*log(1-s_2))
+
+  V_1 <- var((X+X_1)/2)
+  V_2 <- var((X1+X2)/2)
+  
+  return((V_2-V_1)/V_2)
+}
+
+g <- c(1:8)
+h <- numeric(8)
+
+for(i in 1:8)
+  h[i] <- rf(i)
+
+k <- rbind(g,h)
+rownames(k) <- c("σ取值为：","percent reduction")
+knitr::kable(head(k))
+```
+
+
+5.13\
+two important functions:
+$$f_1=e^{-x},x>1$$
+$$f_2=\frac{1}{\sqrt{2\pi}}e^{-\frac{(x-1.65)^2}{2}},x>1$$
+```{r include=TRUE, echo=TRUE}
+n <- 10000
+theta.hat <- se <- numeric(2)
+
+g <- function(x)
+{
+  x^2*exp(-x^2/2)/sqrt(2*pi) * (x>1)
+}
+
+x <- rexp(n,1)    
+fg <- g(x)/exp(-x)
+theta.hat[1] <- mean(fg)
+se[1] <- sd(fg)
+
+x <- rnorm(n,0,1)  
+fg <- g(x)/(exp(-x^2/2)/sqrt(2*pi))
+theta.hat[2] <- mean(fg)
+se[2] <- sd(fg)
+
+rbind(theta.hat,se)
+```
+$f_1=e^{-x},x>1$ produce the smaller variance.
+
+
+5.14
+```{r include=TRUE, echo=TRUE}
+n <- 10000
+g <- function(x)
+{
+  x^2*exp(-x^2/2)/sqrt(2*pi) * (x>1)
+}
+x <- rexp(n,1)  
+f <- g(x)/exp(-x)
+mean(f)
+```
+
+
+## Question
+
+1、Exercises 6.5 and 6.A (page 180-181, Statistical Computing
+with R).
+
+2、If we obtain the powers for two methods under a particular simulation setting with 10,000 experiments: say, 0.651 for one method and 0.676 for another method. We want to know if the powers are different at 0.05 level.
+
+(1)What is the corresponding hypothesis test problem?
+
+(2)What test should we use? Z-test, two-sample t-test, paired-t test or McNemar test? Why?
+
+(3)Please provide the least necessary information for hypothesis testing.
+
+## Answer
+1、
+
+6.5
+```{r include=TRUE, echo=TRUE}
+
+n <- 20
+alpha <- .05
+UCL <- replicate(1000, expr = {
+x <- rchisq(n, df = 2)
+mean(x) -  sqrt(var(x) / (n-1)) * qt(alpha, df = n-1)
+} )
+sum(UCL > 2)
+mean(UCL > 2)
+
+```
+
+6.A
+
+(1)
+```{r include=TRUE, echo=TRUE}
+
+n <- 20
+alpha <- .05
+mu0 <- 1
+sigma <- 2
+m <- 10000 #number of replicates
+p <- numeric(m) #storage for p-values
+for (j in 1:m) {
+x <- rchisq(n, df = 1)
+ttest <- t.test(x, alternative = "greater", mu = mu0)
+p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+
+```
+
+(2)
+```{r include=TRUE, echo=TRUE}
+
+n <- 20
+alpha <- .05
+mu0 <- 1
+sigma <- 8/12
+m <- 10000 #number of replicates
+p <- numeric(m) #storage for p-values
+for (j in 1:m) {
+x <- runif(n, min = 0, max = 2)
+ttest <- t.test(x, alternative = "greater", mu = mu0)
+p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+
+```
+
+(3)
+```{r include=TRUE, echo=TRUE}
+
+n <- 20
+alpha <- .05
+mu0 <- 1
+sigma <- 1
+m <- 10000 #number of replicates
+p <- numeric(m) #storage for p-values
+for (j in 1:m) {
+x <- rexp(n, rate = 1)
+ttest <- t.test(x, alternative = "greater", mu = mu0)
+p[j] <- ttest$p.value
+}
+p.hat <- mean(p < alpha)
+se.hat <- sqrt(p.hat * (1 - p.hat) / m)
+print(c(p.hat, se.hat))
+
+```
+
+2、
+
+(1)
+
+假设检验的问题为：$H_0:\mu_0-\mu_1=0,H_1:\mu_0-\mu_1\neq0$，检验水平$\alpha=0.95$.
+
+(2)
+
+选择two-sample t-test.
+
+(3)
+
+至少需要提供的必要的信息:a particular value of the parameter θ1 ∈ Θ.
+
+
+
+## Question
+
+Exercises 7.7, 7.8, 7.9, and 7.B (pages 213, Statistical
+Computing with R).
+
+## Answer
+7.7\
+```{r include=TRUE, echo=TRUE}
+data(patch, package = "bootstrap")
+
+#sample estimate for n=15
+n <- nrow(patch) #in bootstrap package
+B <- 2000
+theta.b <- numeric(B)
+theta.hat <- mean(patch$y) / mean(patch$z)
+#bootstrap
+for (b in 1:B) {
+i <- sample(1:n, size = n, replace = TRUE)
+y <- patch$y[i]
+z <- patch$z[i]
+theta.b[b] <- mean(y) / mean(z)
+}
+bias <- mean(theta.b) - theta.hat
+se <- sd(theta.b)
+print(list(est=theta.hat, bias = bias,
+se = se, cv = bias/se))
+
+```
+
+7.8\
+```{r include=TRUE, echo=TRUE}
+data(patch, package = "bootstrap")
+n <- nrow(patch)
+y <- patch$y
+z <- patch$z
+theta.hat <- mean(y) / mean(z)
+print (theta.hat)
+#compute the jackknife replicates, leave-one-out estimates
+theta.jack <- numeric(n)
+for (i in 1:n)
+theta.jack[i] <- mean(y[-i]) / mean(z[-i])
+bias <- (n - 1) * (mean(theta.jack) - theta.hat)
+print(bias) #jackknife estimate of bias
+
+se <- sqrt((n-1) *
+mean((theta.jack - mean(theta.jack))^2))
+print(se)
+```
+
+7.9\
+
+```{r include=TRUE, echo=TRUE}
+boot.BCa <-
+function(x, th0, th, stat, conf = .95) {
+# bootstrap with BCa bootstrap confidence interval
+# th0 is the observed statistic
+# th is the vector of bootstrap replicates
+# stat is the function to compute the statistic
+x <- as.matrix(x)
+n <- nrow(x) #observations in rows
+N <- 1:n
+alpha <- (1 + c(-conf, conf))/2
+zalpha <- qnorm(alpha)
+# the bias correction factor
+z0 <- qnorm(sum(th < th0) / length(th))
+# the acceleration factor (jackknife est.)
+th.jack <- numeric(n)
+for (i in 1:n) {
+J <- N[1:(n-1)]
+th.jack[i] <- stat(x[-i, ], J)
+}
+L <- mean(th.jack) - th.jack
+a <- sum(L^3)/(6 * sum(L^2)^1.5)
+# BCa conf. limits
+adj.alpha <- pnorm(z0 + (z0+zalpha)/(1-a*(z0+zalpha)))
+limits <- quantile(th, adj.alpha, type=6)
+return(list("est"=th0, "BCa"=limits))
+}
+
+
+data(patch, package = "bootstrap")
+n <- nrow(patch)
+B <- 2000
+y <- patch$y
+z <- patch$z
+x <- cbind(y, z)
+theta.b <- numeric(B)
+theta.hat <- mean(y) / mean(z)
+#bootstrap
+for (b in 1:B) {
+i <- sample(1:n, size = n, replace = TRUE)
+y <- patch$y[i]
+z <- patch$z[i]
+theta.b[b] <- mean(y) / mean(z)
+}
+#compute the BCa interval
+stat <- function(dat, index) {
+mean(dat[index, 1]) / mean(dat[index, 2]) }
+boot.BCa(x, th0 = theta.hat, th = theta.b, stat = stat)
+
+```
+
+7.B\
+```{r include=TRUE, echo=TRUE}
+n = 100
+mc.skewness = function(xs) {
+  sample.skewness = function (sample) {
+    mu = mean(sample)
+    n = length(sample)
+    num = 1/n * sum(sapply(sample, function (x) (x - mu)^3))
+    denom = sd(sample)^3
+    return (num/denom)
+  }
+  
+  theta.hat = sample.skewness(xs)
+  
+  B = 200
+  theta.hats.b = numeric(B)
+  
+  for (b in 1:B) {
+    i = sample(1:n, n, TRUE)
+    xs.b = xs[i]
+    theta.hats.b[b] = sample.skewness(xs.b)
+  }
+  
+  sd.hat = sd(theta.hats.b)
+  
+
+  par(mfrow = c(1, 1))
+  hist(theta.hats.b)
+
+  alpha = 0.05
+  probs = c(alpha/2, 1-alpha/2)
+  names = sapply(probs, function (p) paste(p*100, '%', sep = ''))
+  qs.theta.hats.b = quantile(theta.hats.b, probs)
+  
+  qs.norm = qnorm(probs)
+  ci.norm = rev(theta.hat - qs.norm * sd.hat)
+  ci.basic = rev(2*theta.hat - qs.theta.hats.b)
+  ci.percentile = qs.theta.hats.b
+  ci.data = data.frame(rbind(ci.norm, ci.basic, ci.percentile))
+  colnames(ci.data) = names
+  ci.data['left.miss'] = 0
+  ci.data['right.miss'] = 0
+  
+  rep = 1000
+  
+  for (r in 1:rep) {
+    i = sample(1:n, n, replace = TRUE)
+    skew = sample.skewness(xs[i])
+    for (y in 1:nrow(ci.data)) {
+      lower = ci.data[y,names[1]]
+      upper = ci.data[y,names[2]]
+      if (skew < lower) {
+        ci.data[y,'left.miss'] = ci.data[y,'left.miss'] + 1
+      } else if (skew > upper) {
+        ci.data[y,'right.miss'] = ci.data[y,'right.miss'] + 1
+      }
+    }
+  }
+  
+  ci.data$left.miss = ci.data$left.miss/rep
+  ci.data$right.miss = ci.data$right.miss/rep
+  
+  return(ci.data)
+}
+
+mean = 3
+sd = 4
+xs = rnorm(n, mean = mean, sd = sd)
+mc.skewness(xs)
+df = 10
+xs = rchisq(n, df = df)
+mc.skewness(xs)
+
+
+```
+
+
+
+## Question
+
+Exercise 8.2 (page 242, Statistical Computing with R).
+
+I Design experiments for evaluating the performance of the NN,
+energy, and ball methods in various situations.
+I Unequal variances and equal expectations
+I Unequal variances and unequal expectations
+I Non-normal distributions: t distribution with 1 df (heavy-tailed
+distribution), bimodel distribution (mixture of two normal
+distributions)
+I Unbalanced samples (say, 1 case versus 10 controls)
+I Note: The parameters should be chosen such that the powers
+are distinguishable (say, range from 0.3 to 0.8).
+
+## Answer
+8.2\
+```{r include=TRUE, echo=TRUE}
+soybean = chickwts$weight[chickwts$feed=="soybean"] 
+linseed = chickwts$weight[chickwts$feed=="linseed"] 
+n = length(soybean) 
+m = length(linseed) 
+tmp = min(n, m) 
+soybean = sort(soybean[1:tmp]) 
+linseed = sort(linseed[1:tmp]) 
+P = c(soybean, linseed) 
+spearman.cor.test = cor.test(x = soybean, y = linseed, method = "spearman") 
+B = 1000 
+k = length(P) 
+rhos = length(rep) 
+for (b in 1:B) { 
+i = sample(1:k, k/2, replace = FALSE) 
+xs = P[i] 
+ys = P[-i] 
+rhos[b] = cor(x = xs, y = ys, method = "spearman") 
+} 
+hist(rhos, breaks = 100) 
+(theta.hat = spearman.cor.test$estimate) 
+spearman.cor.test$p.value 
+(p.hat = mean(abs(rhos) > abs(theta.hat))) 
+(alpha = 0.05) 
+```
+
+question 2\
+1.不等方差和相等期望\
+energy\
+```{r include = TRUE, echo = TRUE}
+edist.2 <- function(x, ix, sizes) {
+dst <- x
+n1 <- sizes[1]
+n2 <- sizes[2]
+ii <- ix[1:n1]
+jj <- ix[(n1+1):(n1+n2)]
+w <- n1 * n2 / (n1 + n2)
+# permutation applied to rows & cols of dist. matrix
+m11 <- sum(dst[ii, ii]) / (n1 * n1)
+m22 <- sum(dst[jj, jj]) / (n2 * n2)
+m12 <- sum(dst[ii, jj]) / (n1 * n2)
+e <- w * ((m12 + m12) - (m11 + m22))
+return (e)
+}
+d <- 3
+a <- 2 / sqrt(d)
+x <- matrix(rnorm(10 ,mean = 0, sd = 1), nrow = 20, ncol = d)
+y <- matrix(rnorm(10 ,mean = 0, sd = 2), nrow = 10, ncol = d)
+z <- rbind(x, y)
+dst <- as.matrix(dist(z))
+edist.2(dst, 1:30, sizes = c(20, 10))
+```
+ball method
+```{r include=TRUE, echo=TRUE}
+dCov <- function(x, y) {
+x <- as.matrix(x)
+y <- as.matrix(y)
+n <- nrow(x)
+m <- nrow(y)
+if (n != m || n < 2) stop("Sample sizes must agree")
+if (! (all(is.finite(c(x, y)))))
+stop("Data contains missing or infinite values")
+Akl <- function(x) {
+d <- as.matrix(dist(x))
+m <- rowMeans(d)
+M <- mean(d)
+a <- sweep(d, 1, m)
+b <- sweep(a, 2, m)
+return(b + M)
+}
+A <- Akl(x)
+B <- Akl(y)
+dCov <- sqrt(mean(A * B))
+dCov
+}
+x=rnorm(10,mean = 0, sd = 1)
+y=rnorm(10,mean = 0, sd = 2)
+dCov(x,y)
+```
+
+2.不等方差和不等期望\
+energy 
+```{r include=TRUE, echo=TRUE}
+edist.2 <- function(x, ix, sizes) {
+dst <- x
+n1 <- sizes[1]
+n2 <- sizes[2]
+ii <- ix[1:n1]
+jj <- ix[(n1+1):(n1+n2)]
+w <- n1 * n2 / (n1 + n2)
+# permutation applied to rows & cols of dist. matrix
+m11 <- sum(dst[ii, ii]) / (n1 * n1)
+m22 <- sum(dst[jj, jj]) / (n2 * n2)
+m12 <- sum(dst[ii, jj]) / (n1 * n2)
+e <- w * ((m12 + m12) - (m11 + m22))
+return (e)
+}
+d <- 3
+a <- 2 / sqrt(d)
+x <- matrix(rnorm(10 ,mean = 0, sd = 1), nrow = 20, ncol = d)
+y <- matrix(rnorm(10 ,mean = 1, sd = 2), nrow = 10, ncol = d)
+z <- rbind(x, y)
+dst <- as.matrix(dist(z))
+edist.2(dst, 1:30, sizes = c(20, 10))
+```
+3)ball method\
+```{r include=TRUE, echo=TRUE}
+dCov <- function(x, y) {
+x <- as.matrix(x)
+y <- as.matrix(y)
+n <- nrow(x)
+m <- nrow(y)
+if (n != m || n < 2) stop("Sample sizes must agree")
+if (! (all(is.finite(c(x, y)))))
+stop("Data contains missing or infinite values")
+Akl <- function(x) {
+d <- as.matrix(dist(x))
+m <- rowMeans(d)
+M <- mean(d)
+a <- sweep(d, 1, m)
+b <- sweep(a, 2, m)
+return(b + M)
+}
+A <- Akl(x)
+B <- Akl(y)
+dCov <- sqrt(mean(A * B))
+dCov
+}
+x=rnorm(10,mean = 0, sd = 1)
+y=rnorm(10,mean = 1, sd = 2)
+dCov(x,y)
+```
+
+3.非正态分布：t 分布具有 1 df（重尾分布），双模型分布（两个正态分布的混合）\
+energy 
+```{r include=TRUE, echo=TRUE}
+edist.2 <- function(x, ix, sizes) {
+dst <- x
+n1 <- sizes[1]
+n2 <- sizes[2]
+ii <- ix[1:n1]
+jj <- ix[(n1+1):(n1+n2)]
+w <- n1 * n2 / (n1 + n2)
+# permutation applied to rows & cols of dist. matrix
+m11 <- sum(dst[ii, ii]) / (n1 * n1)
+m22 <- sum(dst[jj, jj]) / (n2 * n2)
+m12 <- sum(dst[ii, jj]) / (n1 * n2)
+e <- w * ((m12 + m12) - (m11 + m22))
+return (e)
+}
+d <- 3
+a <- 2 / sqrt(d)
+x <- matrix(rt(10 ,df = 1), nrow = 20, ncol = d)
+y <- matrix(rt(10 ,df = 1), nrow = 10, ncol = d)
+z <- rbind(x, y)
+dst <- as.matrix(dist(z))
+edist.2(dst, 1:30, sizes = c(20, 10))
+```
+ball method
+```{r include=TRUE, echo=TRUE}
+dCov <- function(x, y) {
+x <- as.matrix(x)
+y <- as.matrix(y)
+n <- nrow(x)
+m <- nrow(y)
+if (n != m || n < 2) stop("Sample sizes must agree")
+if (! (all(is.finite(c(x, y)))))
+stop("Data contains missing or infinite values")
+Akl <- function(x) {
+d <- as.matrix(dist(x))
+m <- rowMeans(d)
+M <- mean(d)
+a <- sweep(d, 1, m)
+b <- sweep(a, 2, m)
+return(b + M)
+}
+A <- Akl(x)
+B <- Akl(y)
+dCov <- sqrt(mean(A * B))
+dCov
+}
+x=rt(10,df = 1)
+y=rt(10,df = 1)
+dCov(x,y)
+```
+
+
+## Question
+Exercises 9.3 and 9.8 (pages 277-278, Statistical Computing
+with R).\
+I For each of the above exercise, use the Gelman-Rubin method
+to monitor convergence of the chain, and run the chain until it
+converges approximately to the target distribution according to
+ˆR < 1.2.\
+
+## Answer
+9.3\
+```{r include=TRUE, echo=TRUE}
+theta = 1
+eta = 0
+N = 10000
+
+stopifnot(theta > 0)
+
+df = function(x) {
+  1/(theta*pi*(1+((x-eta)/theta)^2))
+}
+
+dg = function(x, df) {
+  dnorm(x = x, mean = df)
+}
+
+rg = function(df) {
+  rnorm(n = 1, mean = df)
+}
+
+mh = function (N, df, dg, rg) {
+  x = numeric(N)
+  x[1] = rg(1)
+  k = 0
+  u = runif(N)
+  for (i in 2:N) {
+    xt = x[i-1]
+    y = rg(xt)
+    r = df(y) * dg(xt, y) / (df(xt) * dg(y, xt))
+    if (u[i] <= r) {
+      x[i] = y
+    } else {
+      k = k + 1
+      x[i] = xt
+    }
+  }
+  print(k)
+  return(x)
+}
+
+x = mh(N, df, dg, rg)
+is = 1001:N
+par(mfrow = c(1,2))
+plot(is, x[is])
+hist(x, probability = TRUE, breaks = 200)
+plot.x = seq(min(x), max(x), 0.01)
+lines(plot.x, df(plot.x))
+par(mfrow = c(1,1))
+```
+
+9.8\
+```{r include = TRUE, echo = TRUE}
+n = 100
+a = 30
+b = 60
+
+df = function (x, y) {
+  gamma(n + 1) / (gamma(x + 1) * gamma(n - x + 1))  * y^(x + a - 1) * (1 - y)^(n - x + b - 1)
+}
+
+m = 10000
+d = 2
+
+x = matrix(0, nrow = m, ncol = d)
+
+for (i in 2:m) {
+  xt = x[i-1,]
+  xt[1] = rbinom(1, n, xt[2])
+  xt[2] = rbeta(1, xt[1] + a, n - xt[1] + b)
+  x[i,] = xt
+}
+
+plot(x, cex = 0.1)
+xs = seq(from = min(x[,1]), to = max(x[,1]), length.out = 200)
+ys = seq(from = min(x[,2]), to = max(x[,2]), length.out = 200)
+zs = t(sapply(xs, function (x) sapply(ys, function (y) df(x, y))))
+
+contour(xs, ys, zs, add = TRUE, col = 2)
+```
+
+
+
+
+
+
+## Question
+Exercises 11.3 and 11.5 (pages 353-354, Statistical Computing with R)\
+Suppose T1,...,Tn are i.i.d. samples drawn from the exponential distribution with expectationλ. Those values greater thanτare not observed due to right censorship, so that the observed values are Yi=TiI(Ti≤τ) +τI(Ti> τ),i=1,...,n. Supposeτ=1 and the observed Yi values are as follows:0.54,0.48,0.33,0.43,1.00,1.00,0.91,1.00,0.21,0.85Use the E-M algorithm to estimateλ, compare your result with the observed data MLE (note:Yi follows a mixture distribution).
+
+## Answer
+11.3\
+```{r include=TRUE, echo=TRUE}
+
+a = c(1,2)
+d = length(a)
+
+get_term = function (a, k) {
+  d = length(a)
+  return((-1)^k * exp((2*k+2)*log(norm(a, type = "2")) - lgamma(k+1) - k*log(2) - log(2*k + 1) - log(2*k + 2) + lgamma((d+1)/2) + lgamma(k + 3/2) - lgamma(k + d/2 + 1)))
+}
+
+n = 400
+
+sum_function = function (a) {
+  sum(sapply(0:n, function (k) get_term(a, k)))
+}
+
+sum_function(a)
+
+```
+
+11.5\
+```{r include = TRUE, echo = TRUE}
+
+solve.equation = function (k) {
+  
+  expr.integral = function(u, n) {
+    (1 + u^2/(n-1))^(-n/2)
+  }
+  
+  get.c = function (n, a) {
+    sqrt(a^2 * n / (n + 1 - a^2))
+  }
+  
+  expr = function (n, a) {
+    
+    this.integral = function (u) {
+      expr.integral(u, n)
+    }
+    
+    c = get.c(n - 1, a)
+    
+    2/sqrt(pi*(n-1)) * exp(lgamma(n/2)-lgamma((n-1)/2)) * integrate(this.integral, lower = 0, upper = c)$value
+  }
+  
+  f = function (a) {
+    left = expr(k, a)
+    right = expr(k + 1, a)
+    return (left - right)
+  }
+  
+  eps = 1e-2
+  if (f(eps) < 0 && f(sqrt(k) - eps) > 0 || f(eps) > 0 && f(sqrt(k) - eps) < 0) {
+    r = uniroot(f, interval = c(eps, sqrt(k)-eps))$root
+  } else {
+    r = NA
+  }
+  return(r)
+}
+
+rs2 = sapply(c(4:25, 100, 500, 1000), function (k) {
+  solve.equation(k)
+})
+
+print(rs2)
+```
+
+exercise\
+```{r include = TRUE, echo = TRUE}
+set.seed(543)
+y <- c(0.54,0.48,0.33,0.43,1.00,1.00,0.91,1.00,0.21,0.85)
+N <- 1000
+L <- c(.5, .4, .1) 
+tol <- .Machine$double.eps^0.5
+L.old <- L + 1
+for (j in 1:N) {
+f1 <- dgamma(y, shape=1/2, rate=1/(2*L[1]))
+f2 <- dgamma(y, shape=1/2, rate=1/(2*L[2]))
+f3 <- dgamma(y, shape=1/2, rate=1/(2*L[3]))
+py <- f1 / (f1 + f2 + f3) 
+qy <- f2 / (f1 + f2 + f3) 
+ry <- f3 / (f1 + f2 + f3) 
+mu1 <- sum(y * py) / sum(py)
+mu2 <- sum(y * qy) / sum(qy)
+mu3 <- sum(y * ry) / sum(ry)
+L <- c(mu1, mu2, mu3) 
+L <- L / sum(L)
+if (sum(abs(L - L.old)/L.old) < tol) break
+L.old <- L
+}
+print(list(lambda = L/sum(L), iter = j, tol = tol))
+```
+
+
+
+## Question
+Exercises 1 and 5 (page 204, Advanced R).\
+Exercises 1 and 7 (page 214, Advanced R)
+
+## Answer
+1(page 204)\
+```{r include = TRUE, echo = TRUE}
+# in mean(), there is ... to hold unspecified input
+# However, x = x rather than x must be used.
+```
+
+5 (page 204)\
+
+```{r include = TRUE, echo = TRUE}
+bootstraps <- lapply(1:10, function(i) {
+  rows <- sample(1:nrow(mtcars), rep = TRUE)
+  mtcars[rows, ]
+})
+
+results_0 <- vector("list", 10)
+for(i in seq_along(bootstraps)){
+  results_0[[i]] <- lm(mpg ~ disp, data = bootstraps[[i]])
+}
+
+results_1 <- vector("list", 10)
+
+lm_mtcars <- function(data){
+  lm(mpg ~ disp, data = data)
+}
+
+results_1 <- lapply(bootstraps, lm_mtcars)
+
+rsq <- function(mod) summary(mod)$r.squared
+unlist(lapply(results_0, rsq))
+unlist(lapply(results_1, rsq))
+```
+
+1(page 214)\
+
+```{r include = TRUE, echo = TRUE}
+# a)
+all(unlist(lapply(mtcars, is.numeric)))
+vapply(mtcars, sd, numeric(1))
+
+# b)
+mtcars_mixed <- cbind(mtcars, letter = letters[1:dim(mtcars)[1]])
+num_indexes <- vapply(mtcars_mixed, is.numeric, logical(1))
+vapply(mtcars_mixed[,num_indexes], sd, numeric(1))
+```
+
+7 (page 214)\
+```{r include = TRUE, echo = TRUE}
+# No.
+```
+
+
+
+## Question
+Write an Rcpp function for Exercise 9.8 (page 278, Statistical Computing with R).\
+Compare the corresponding generated random numbers with pure R language using the function “qqplot”.\
+Compare the computation time of the two functions with the function “microbenchmark”.\
+Comments your results.
+
+## Answer
+
+```{r}
+
+n = 100
+a = 30
+b = 60
+
+df = function (x, y) {
+  gamma(n + 1) / (gamma(x + 1) * gamma(n - x + 1))  * y^(x + a - 1) * (1 - y)^(n - x + b - 1)
+}
+
+m = 10000
+d = 2
+
+x = matrix(0, nrow = m, ncol = d)
+
+for (i in 2:m) {
+  xt = x[i-1,]
+  xt[1] = rbinom(1, n, xt[2])
+  xt[2] = rbeta(1, xt[1] + a, n - xt[1] + b)
+  x[i,] = xt
+}
+
+plot(x, cex = 0.1)
+xs = seq(from = min(x[,1]), to = max(x[,1]), length.out = 200)
+ys = seq(from = min(x[,2]), to = max(x[,2]), length.out = 200)
+zs = t(sapply(xs, function (x) sapply(ys, function (y) df(x, y))))
+
+contour(xs, ys, zs, add = TRUE, col = 2)
+```
+
+
+
+
+

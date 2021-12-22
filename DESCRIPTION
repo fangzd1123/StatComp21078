@@ -1,0 +1,17 @@
+Package: StatComp21078
+Type: Package
+Title: Final homework of statistical computations
+Version: 1.0
+Date: 2021-12-21
+Author: StatComp21078
+Maintainer: StatComp21078 <709476524@qq.com>
+Description: It includes the homework of the whole semester and two functions of my research field.
+License: GPL (>= 2)
+Imports: Rcpp , microbenchmark, knitr, rmarkdown,  MASS, boot, bootstrap, RANN, Ball, energy, FastKNN,pdist
+LinkingTo: Rcpp
+RoxygenNote: 7.1.2
+Encoding: UTF-8
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+URL: http://github.com/fangzd1123/StatComp21078
+BugReports: http://github.com/fangzd1123/StatComp21078/issues
